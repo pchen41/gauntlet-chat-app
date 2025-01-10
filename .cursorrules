@@ -1,0 +1,91 @@
+You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+
+Key Principles
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported component, subcomponents, helpers, static content, types.
+
+Naming Conventions
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
+
+TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+
+Syntax and Formatting
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+
+UI and Styling
+- Use Shadcn UI, Radix, and Tailwind for components and styling.
+- Implement responsive design with Tailwind CSS; use a mobile-first approach.
+
+Performance Optimization
+- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
+- Wrap client components in Suspense with fallback.
+- Use dynamic loading for non-critical components.
+- Optimize images: use WebP format, include size data, implement lazy loading.
+
+Key Conventions
+- Use 'nuqs' for URL search parameter state management.
+- Optimize Web Vitals (LCP, CLS, FID).
+- Limit 'use client':
+- Favor server components and Next.js SSR.
+- Use only for Web API access in small components.
+- Avoid for data fetching or state management.
+
+Follow Next.js docs for Data Fetching, Rendering, and Routing.
+
+here is my database schema:
+
+messages:
+- id: uuid
+- user_id: uuid
+- channel_id: uuid
+- message: text
+- parent_id: uuid (nullable)
+- created_at: timestamp
+
+message_reactions:
+- id: uuid
+- message_id: uuid
+- user_id: uuid
+- reaction: text
+- channel_id: uuid
+- created_at: timestamp
+
+message_attachments:
+- id: uuid
+- message_id: uuid
+- file_url: text
+- file_name: text
+- channel_id: uuid
+- created_at: timestamp
+
+profiles:
+- id: uuid (same as user_id)
+- created_at: timestamp
+- name: text
+- email: text
+- status: text (nullable)
+
+channels:
+- id: uuid
+- name: text
+- description: text (nullable)
+- type: text (values can bepublic, private or direct)
+- created_at: timestamp
+- created_by: uuid (user_id)
+
+channel_members:
+- id: uuid
+- channel_id: uuid
+- user_id: uuid
+- created_at: timestamp
+- updated_at: timestamp
+- hidden_from_channel_list: boolean (nullable, default false)

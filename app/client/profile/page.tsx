@@ -1,159 +1,188 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '../../components/AuthProvider'
-import { supabase } from '@/utils/supabase-client'
+import { useCallback, useEffect, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { LogOut, User, Mail, MessageSquare } from 'lucide-react'
+import { Separator } from "@/components/ui/separator"
+import { Avatar } from "@/components/ui/avatar"
+import UserAvatar from "@/components/client/user-avatar/user-avatar"
+import { LoaderCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-export default function Profile() {
-  const { user, updateUserContext, signOut } = useAuth()
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState('')
-  const [loading, setLoading] = useState(true)
+interface Profile {
+  id: string
+  name: string
+  email: string
+  status: string | null
+}
+
+export default function ProfilePage() {
   const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const { toast } = useToast()
+  const supabase = createClient()
 
-  useEffect(() => {
-    async function fetchProfile() {
-      if (user) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('name, email, status')
-            .eq('id', user.id)
-            .single()
-
-          if (error) throw error
-
-          setName(data.name || '')
-          setEmail(data.email || user.email || '')
-          setStatus(data.status || '')
-        } catch (error) {
-          console.error('Error fetching profile:', error)
-        } finally {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchProfile()
-  }, [user])
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
+  const getProfile = useCallback(async () => {
     try {
-      const { error } = await supabase
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) throw new Error('No user found')
+
+      const { data, error } = await supabase
         .from('profiles')
-        .update({ status })
+        .select('id, name, email, status')
         .eq('id', user.id)
+        .single()
 
       if (error) throw error
 
-      await updateUserContext()
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      })
+      setProfile(data)
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: 'Error loading profile',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive'
       })
     } finally {
       setLoading(false)
     }
+  }, [supabase, toast])
+
+  const updateProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!profile) return
+
+    try {
+      setSaving(true)
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          status: profile.status
+        })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      toast({
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully.'
+      })
+      router.refresh()
+    } catch (error: any) {
+      toast({
+        title: 'Error updating profile',
+        description: error.message,
+        variant: 'destructive'
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleLogout = async () => {
-    await signOut()
-    router.push('/login')
+  useEffect(() => {
+    getProfile()
+  }, [getProfile])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
+        <LoaderCircle className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
-  if (!user) {
-    router.push('/login')
-    return null
-  }
+  if (!profile) return null
 
   return (
-    <div className="container max-w-2xl mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center space-x-4">
-            <Avatar className="w-20 h-20 rounded-lg">
-              <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${name}`} />
-              <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+    <div className="space-y-6 p-10 pb-16 block">
+      <div className="space-y-0.5">
+        <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
+        <p className="text-muted-foreground">
+          Manage your profile information.
+        </p>
+      </div>
+      <Separator />
+      <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+        <aside className="lg:w-1/5">
+          <div className="flex flex-col items-center space-y-4">
+            <Avatar className="h-32 w-32 rounded-lg">
+              <UserAvatar 
+                name={profile.name} 
+                email={profile.email}
+                textClass="text-5xl"
+              />
             </Avatar>
-            <div>
-              <CardTitle className="text-2xl font-bold">{name}</CardTitle>
-              <CardDescription>{email}</CardDescription>
+            <div className="text-center">
+              <h3 className="font-medium">{profile.name}</h3>
+              <p className="text-sm text-muted-foreground">{profile.email}</p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleUpdateProfile}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    value={name}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
+        </aside>
+        <div className="flex-1 lg:max-w-2xl">
+          <form onSubmit={updateProfile} className="space-y-8">
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium">General Information</h3>
+              <p className="text-sm text-muted-foreground">
+                Update your profile information and manage your account.
+              </p>
+            </div>
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Name
+                </label>
+                <Input
+                  id="name"
+                  value={profile.name}
+                  disabled
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    value={email}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
+              <div className="grid gap-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  value={profile.email}
+                  disabled
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    placeholder="Set your status"
-                  />
-                </div>
+
+              <div className="grid gap-2">
+                <label htmlFor="status" className="text-sm font-medium">
+                  Status
+                </label>
+                <Input
+                  id="status"
+                  value={profile.status || ''}
+                  onChange={(e) => setProfile({ ...profile, status: e.target.value })}
+                  placeholder="Set a status message..."
+                />
+                <p className="text-sm text-muted-foreground">
+                  Your status will be visible to other users in the chat.
+                </p>
               </div>
             </div>
-            <CardFooter className="flex justify-between mt-6 px-0">
-              <Button type="submit" disabled={loading}>
-                {loading ? 'Updating...' : 'Update Status'}
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </CardFooter>
+
+            <Button type="submit" disabled={saving}>
+              {saving ? (
+                <>
+                  Saving Changes
+                  <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
-
