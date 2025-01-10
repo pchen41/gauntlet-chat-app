@@ -182,7 +182,7 @@ export default function ChannelMembersDialog({user, channel, isOpen, onClose }: 
     }
   }
 
-  const showSuggestions = isInputFocused && searchResults.length > 0
+  const showSuggestions = searchResults.length > 0
   const borderRounding = showSuggestions ? 'rounded-t-md' : 'rounded-md'
 
   return (
