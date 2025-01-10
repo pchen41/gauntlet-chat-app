@@ -54,7 +54,7 @@ export default function ChannelMembersDialog({user, channel, isOpen, onClose }: 
       setNewMemberEmail('')
       setSearchResults([])
     }
-  }, [isOpen, channelId])
+  }, [isOpen, channelId, fetchMembers])
 
   async function fetchMembers() {
     const { data: membersData, error: membersError } = await supabase
