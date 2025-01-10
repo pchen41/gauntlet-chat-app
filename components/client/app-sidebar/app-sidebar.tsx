@@ -96,7 +96,7 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user.id, supabase, fetchChannels])
+  }, [user.id, supabase])
 
   let channelId = undefined
   if (pathname.includes('/client/channel/')) {
