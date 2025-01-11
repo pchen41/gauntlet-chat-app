@@ -15,17 +15,23 @@ export function SearchHeader() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
+  const [initialQuery, setInitialQuery] = useState("")
 
   useEffect(() => {
     const query = searchParams.get('q')
     if (query) {
       setSearchQuery(query)
+      setInitialQuery(query)
     }
   }, [searchParams])
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      router.push(`/client/search?q=${encodeURIComponent(searchQuery)}`)
+      if (initialQuery == searchQuery) {
+        router.refresh()
+      } else {
+        router.push(`/client/search?q=${encodeURIComponent(searchQuery)}`)
+      }
     }
   }
 

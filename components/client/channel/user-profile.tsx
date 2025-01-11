@@ -30,8 +30,6 @@ export function UserProfile({ userId, profiles, handleCloseProfile }: UserProfil
     channel
       .on('presence', { event: 'sync' }, () => {
         const presenceState = channel.presenceState()
-
-        console.log(presenceState)
         const isUserOnline = Object.values(presenceState).some(presence => 
           (presence as any[]).some(p => p.user_id === userId)
         )
@@ -78,15 +76,14 @@ export function UserProfile({ userId, profiles, handleCloseProfile }: UserProfil
 
           <div className="text-center">
             <h3 className="font-semibold text-lg">{profile.name}</h3>
+            {profile.status && (
+              <p className="text-sm text-muted-foreground">{profile.status}</p>
+            )}
             <div className="flex items-center justify-center gap-2 mt-1">
               <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
               <span className="text-sm text-muted-foreground">{isOnline ? 'Online' : 'Offline'}</span>
             </div>
-            {profile.status && (
-              <p className="text-sm text-muted-foreground mt-1">{profile.status}</p>
-            )}
           </div>
-
           <div className="w-full pt-4 border-t">
             <div className="flex items-center text-sm text-muted-foreground">
               <Mail className="h-4 w-4 mr-2" />

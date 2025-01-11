@@ -46,6 +46,8 @@ export default function SearchResults({
     try {
       const { searchText, email } = parseQuery(initialQuery)
       
+      // Format search text by removing duplicate spaces and replacing remaining spaces with +
+      const formattedSearchText = searchText.replace(/\s+/g, ' ').trim().replace(/\s/g, '+')
       let query = supabase
         .from('messages')
         .select(`
@@ -54,7 +56,7 @@ export default function SearchResults({
           message_reactions(id, user_id, reaction, created_at),
           channels!inner(id, type, name)
         `)
-        .textSearch('message', searchText)
+        .textSearch('message', formattedSearchText)
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
         .order('created_at', { ascending: false })
 
@@ -119,22 +121,6 @@ export default function SearchResults({
     }
   }, [inView])
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4 p-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-start space-x-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       <div className="p-4 border-b">
@@ -145,7 +131,19 @@ export default function SearchResults({
       </div>
       
       <div className="flex-1 p-4 overflow-y-auto">
-        {messages.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-start space-x-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : messages.length === 0 ? (
           <div className="text-center text-muted-foreground">
             No messages found matching your search.
           </div>

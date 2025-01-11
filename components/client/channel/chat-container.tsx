@@ -29,7 +29,7 @@ export default function ChatContainer({user, channel} : {user: User, channel: Ch
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, name, email')
+      .select('id, name, email, status')
       .in('id', newUserIds);
 
     if (error) {
