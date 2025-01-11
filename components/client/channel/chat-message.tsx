@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { JSX } from "react";
+import { usePresenceState } from "@/contexts/presence-context";
 
 export default function ChatMessage({
   user,
@@ -114,6 +115,8 @@ export default function ChatMessage({
     }
   }
   const replyLength = message.replies?.length || 0
+  const onlineUsers = usePresenceState()
+  const isOnline = onlineUsers[message.user_id]
 
   return (
     <div className="hover:bg-muted/40 pt-2">
@@ -142,7 +145,11 @@ export default function ChatMessage({
                   </TooltipTrigger>
                   <TooltipContent>
                     <div>{email}</div>
-                    <div>{status}</div>
+                    {status && <div>{status}</div>}
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className={`h-1.5 w-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <span className="text-xs text-muted-foreground">{isOnline ? 'Online' : 'Offline'}</span>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

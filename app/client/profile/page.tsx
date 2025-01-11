@@ -100,7 +100,7 @@ export default function ProfilePage() {
   if (!profile) return null
 
   return (
-    <div className="space-y-6 p-10 pb-16 block">
+    <div className="space-y-6 p-10 pb-16 block h-full overflow-y-auto">
       <div className="space-y-0.5">
         <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
         <p className="text-muted-foreground">

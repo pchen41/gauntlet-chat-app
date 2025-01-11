@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { usePresenceState } from '@/contexts/presence-context'
 
 type Member = {
   id: string
@@ -184,6 +185,7 @@ export default function ChannelMembersDialog({user, channel, isOpen, onClose }: 
 
   const showSuggestions = searchResults.length > 0
   const borderRounding = showSuggestions ? 'rounded-t-md' : 'rounded-md'
+  const onlineUsers = usePresenceState()
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -232,7 +234,10 @@ export default function ChannelMembersDialog({user, channel, isOpen, onClose }: 
                           <UserAvatar name={result.name} email={result.email} />
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="text-sm">{result.name}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm">{result.name}</span>
+                            <span className={`h-1.5 w-1.5 rounded-full ${onlineUsers[result.id] ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          </div>
                           <span className="text-xs text-muted-foreground">{result.email}</span>
                         </div>
                       </div>
@@ -251,7 +256,10 @@ export default function ChannelMembersDialog({user, channel, isOpen, onClose }: 
                   </Avatar>
                   <div>
                     <div className="flex items-center space-x-2">
-                      <p className="text-sm font-medium">{member.name}</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">{member.name}</span>
+                        <span className={`h-1.5 w-1.5 rounded-full ${onlineUsers[member.id] ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      </div>
                     </div>
                     <p className="text-xs text-muted-foreground">{member.email}</p>
                   </div>

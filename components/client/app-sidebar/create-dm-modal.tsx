@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
+import { usePresenceState } from "@/contexts/presence-context"
 
 interface Profile {
   id: string
@@ -118,6 +119,7 @@ export function CreateDMModal({
   }
 
   const borderRounding = searchResults.length > 0 ? 'rounded-t-md' : 'rounded-md'
+  const onlineUsers = usePresenceState()
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -177,7 +179,10 @@ export function CreateDMModal({
                         <UserAvatar name={user.name} email={user.email}/>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-sm">{user.name}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">{user.name}</span>
+                          <span className={`h-1.5 w-1.5 rounded-full ${onlineUsers[user.id] ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        </div>
                         <span className="text-xs text-muted-foreground">{user.email}</span>
                       </div>
                     </div>

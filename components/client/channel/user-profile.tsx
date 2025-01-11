@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import UserAvatar from "../user-avatar/user-avatar"
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
+import { usePresenceState } from "@/contexts/presence-context"
 
 interface UserProfileProps {
   userId: string
@@ -21,37 +22,31 @@ interface UserProfileProps {
 
 export function UserProfile({ userId, profiles, handleCloseProfile }: UserProfileProps) {
   const profile = profiles[userId]
-  const [isOnline, setIsOnline] = useState(false)
+  const [status, setStatus] = useState(profile?.status)
+  const onlineUsers = usePresenceState()
+  const isOnline = onlineUsers[userId] || false
   const supabase = createClient()
 
   useEffect(() => {
-    const channel = supabase.channel('online-users')
-    
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState()
-        const isUserOnline = Object.values(presenceState).some(presence => 
-          (presence as any[]).some(p => p.user_id === userId)
-        )
-        setIsOnline(isUserOnline)
-      })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        const isUserJoined = newPresences.some(p => p.user_id === userId)
-        if (isUserJoined) {
-          setIsOnline(true)
+    if (!userId) return
+
+    // Subscribe to profile changes
+    const channel = supabase.channel(`profile-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`
+        },
+        (payload) => {
+          if (payload.new) {
+            setStatus(payload.new.status)
+          }
         }
-      })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        const isUserLeft = leftPresences.some(p => p.user_id === userId)
-        if (isUserLeft) {
-          setIsOnline(false)
-        }
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({ user_id: userId })
-        }
-      })
+      )
+      .subscribe()
 
     return () => {
       channel.unsubscribe()
@@ -76,8 +71,8 @@ export function UserProfile({ userId, profiles, handleCloseProfile }: UserProfil
 
           <div className="text-center">
             <h3 className="font-semibold text-lg">{profile.name}</h3>
-            {profile.status && (
-              <p className="text-sm text-muted-foreground">{profile.status}</p>
+            {status && (
+              <p className="text-sm text-muted-foreground">{status}</p>
             )}
             <div className="flex items-center justify-center gap-2 mt-1">
               <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />

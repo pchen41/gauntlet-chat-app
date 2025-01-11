@@ -2,12 +2,6 @@
 
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 
@@ -39,23 +33,14 @@ export function SearchHeader() {
     <header className="h-14 bg-sidebar flex items-center">
       <div className="relative flex-1 max-w-xl">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <TooltipProvider delayDuration={300}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Input 
-                type="search"
-                placeholder="Search messages..."
-                className="w-full pl-9 bg-background"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Use '@email:email' to filter by email of the sender</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Input 
+          type="search"
+          placeholder="Search messages..."
+          className="w-full pl-9 bg-background"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleSearch}
+        />
       </div>
     </header>
   )

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/client/app-sidebar/app-sidebar'
 import { SearchHeader } from '@/components/client/search/search-header'
+import { PresenceProvider } from '@/contexts/presence-context'
 
 export default async function ClientLayout({
   children,
@@ -73,14 +74,16 @@ export default async function ClientLayout({
   })) || []
 
   return (
-    <SidebarProvider>
-      <AppSidebar user={data.user} initialChannels={initialChannels} />
-      <SidebarInset className="bg-sidebar flex flex-col h-screen">
-        <SearchHeader />
-        <div className="flex-1 rounded-tl-md overflow-hidden bg-background border">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <PresenceProvider user={data.user}>
+      <SidebarProvider>
+        <AppSidebar user={data.user} initialChannels={initialChannels} />
+        <SidebarInset className="bg-sidebar flex flex-col h-screen">
+          <SearchHeader />
+          <div className="flex-1 rounded-tl-md overflow-hidden bg-background border">
+            {children}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </PresenceProvider>
   )
 }

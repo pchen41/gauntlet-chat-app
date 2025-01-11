@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Smile } from 'lucide-react'
 import { cn } from "@/lib/utils"
 
-const commonEmojis = ['😀', '😂', '😍', '😎', '👍', '👎', '🤔', '❤️', '🔥', '🎉']
+const commonEmojis = ['😀', '😂', '😍', '😎', '👍', '👎', '🤔', '❤️', '🔥', '🎉', '✨', '💯', '🙏', '💪', '🤣', '😅', '😭', '🥺', '☹️','😴' ]
 
 type EmojiPickerProps = {
   onEmojiSelect: (emoji: string) => void

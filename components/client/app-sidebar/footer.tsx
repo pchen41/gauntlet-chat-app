@@ -99,7 +99,7 @@ export default function Footer({user}: {user: User}) {
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <UserIcon />
-                  <Link href="/client/profile">
+                  <Link href="/client/profile" className="w-full">
                     Profile
                   </Link>                
                 </DropdownMenuItem>
@@ -107,7 +107,7 @@ export default function Footer({user}: {user: User}) {
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <LogOut />
-                <Link href="/auth/logout">
+                <Link href="/logout" className="w-full">
                   Log out
                 </Link>
               </DropdownMenuItem>
