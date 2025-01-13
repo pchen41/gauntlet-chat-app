@@ -6,25 +6,31 @@ import { Button } from "@/components/ui/button"
 import { Smile } from 'lucide-react'
 import { cn } from "@/lib/utils"
 
-const commonEmojis = ['😀', '😂', '😍', '😎', '👍', '👎', '🤔', '❤️', '🔥', '🎉', '✨', '💯', '🙏', '💪', '🤣', '😅', '😭', '🥺', '☹️','😴' ]
+const commonEmojis = ['😀', '😂', '😍', '😎', '👍', '👎', '🤔', '❤️', '🔥', '🎉', '✨', '💯', '🙏', '💪', '🤣', '😅', '😭', '🥺', '☹️', '😴', '🎯', '🚀', '💡', '👋']
 
 type EmojiPickerProps = {
   onEmojiSelect: (emoji: string) => void
   className?: string
+  disabled?: boolean
 }
 
-export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
+export function EmojiPicker({ onEmojiSelect, className, disabled }: EmojiPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className={cn("p-0 h-8 w-8", className)}>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={cn("p-0 h-8 w-8", className)}
+          disabled={disabled}
+        >
           <Smile className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <div className="grid grid-cols-5 gap-2 p-2">
+        <div className="grid grid-cols-6 gap-2 p-2">
           {commonEmojis.map((emoji, index) => (
             <Button
               key={index}
@@ -43,4 +49,3 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
     </Popover>
   )
 }
-

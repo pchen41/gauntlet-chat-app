@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { JSX } from "react";
 import { usePresenceState } from "@/contexts/presence-context";
+import Image from 'next/image'
+import { MessageImage } from "./message-image";
 
 export default function ChatMessage({
   user,
@@ -122,7 +124,7 @@ export default function ChatMessage({
     <div className="hover:bg-muted/40 pt-2">
       { channelName && <span className="text-sm ml-4">{channelName}</span>}
       <div className={cn("flex items-start space-x-3 group p-4 pb-2 pt-0")}>
-        <Avatar className="h-8 w-8 rounded-md flex-shrink-0 mt-1.5">
+        <Avatar className="h-8 w-8 rounded-md flex-shrink-0 mt-[.4rem]">
           {name && <UserAvatar name={name} email={email} /> }
         </Avatar>
 
@@ -178,41 +180,68 @@ export default function ChatMessage({
           </div>
           <p>{message.message}</p>
           {message.message_attachments && (
-            message.message_attachments.map((attachment, index) => (
-              <Button variant="outline" className="mt-2" key={`attachment-${index}`} asChild>
-                <a href={attachment.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 text-blue-600 hover:text-blue-600">
-                  <FileIcon className="h-4 w-4" />
-                  <span>{attachment.file_name}</span>
-                </a>
-              </Button>
-            ))
+            <div className="flex flex-wrap gap-2 mt-1.5">
+              {/* First render image attachments */}
+              {message.message_attachments
+                .filter(attachment => /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.file_name))
+                .map((attachment, index) => (
+                  <MessageImage
+                    key={`image-${index}`}
+                    src={attachment.file_url}
+                    alt={attachment.file_name}
+                    fileName={attachment.file_name}
+                  />
+                ))
+              }
+              {/* Then render non-image attachments */}
+              {message.message_attachments
+                .filter(attachment => !/\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.file_name))
+                .map((attachment, index) => (
+                  <Button variant="outline" key={`file-${index}`} asChild>
+                    <a 
+                      href={attachment.file_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center text-blue-600 hover:text-blue-600 pl-2.5 pr-2.5"
+                    >
+                      <FileIcon className="h-4 w-4" />
+                      <span>{attachment.file_name}</span>
+                    </a>
+                  </Button>
+                ))
+              }
+            </div>
           )}
           {!disabled && (
             <>
-              <div className="mt-2 flex flex-wrap gap-1 items-center">
-                {sortedReactions.map((reaction, index) => (
-                  <TooltipProvider key={`reaction-${index}`}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`px-2 py-0 h-8 ${reaction.users.some((reactionUser) => reactionUser.userId === user.id) ? 'bg-sky-50' : ''}`}
-                          onClick={() => handleReactionClick(reaction.reaction)}
-                        >
-                          {reaction.reaction} {reaction.count}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {reaction.users.map((user, index) => {
-                          const reactingUser = profiles.get(user.userId)?.name || 'Unknown User'
-                          return <div key={`user-${index}`}>{reactingUser}</div>
-                        })}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              </div>
+              { 
+                sortedReactions.length > 0 && (
+                  <div className={cn("flex flex-wrap gap-1 items-center", message.message_attachments && message.message_attachments.length > 0 ? 'mt-2.5' : '')}>
+                    {sortedReactions.map((reaction, index) => (
+                      <TooltipProvider key={`reaction-${index}`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`px-2 py-0 h-8 ${reaction.users.some((reactionUser) => reactionUser.userId === user.id) ? 'bg-sky-50' : ''}`}
+                              onClick={() => handleReactionClick(reaction.reaction)}
+                            >
+                              {reaction.reaction} {reaction.count}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {reaction.users.map((user, index) => {
+                              const reactingUser = profiles.get(user.userId)?.name || 'Unknown User'
+                              return <div key={`user-${index}`}>{reactingUser}</div>
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                )
+              }
               {onOpenThread && !message.parent_id && replyLength > 0 && (
                 <div 
                   className="mt-2 text-sm text-blue-600 cursor-pointer flex items-center"

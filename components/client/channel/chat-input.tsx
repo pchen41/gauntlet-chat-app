@@ -3,20 +3,28 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@supabase/supabase-js";
-import { FileIcon, Paperclip, Send, X } from "lucide-react";
+import { FileIcon, Loader2, Paperclip, Send, X } from "lucide-react";
 import { ChangeEvent, useRef, useState } from "react";
 import { EmojiPicker } from "./emoji-picker";
 
 export default function ChatInput({active, onSendMessage} : {active: boolean, onSendMessage: (message: string, files?: File[]) => Promise<{status: string, message?: string} | void>}) {
   const [newMessage, setNewMessage] = useState('')
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-
-    console.log('setting file', e.target.files)
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0])
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files)
+      setFiles(prev => {
+        const uniqueFiles = newFiles.filter(newFile => 
+          !prev.some(existingFile => 
+            existingFile.name === newFile.name && 
+            existingFile.size === newFile.size
+          )
+        )
+        return [...prev, ...uniqueFiles]
+      })
     }
   }
 
@@ -24,15 +32,30 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
     fileInputRef.current?.click()
   }
 
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+    if (files.length === 1 && fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   async function sendMessage(e: React.FormEvent | React.KeyboardEvent) {
     e.preventDefault();
-    if (!newMessage.trim()) return
+    if (!newMessage.trim() || isLoading) return
 
     if(active) {
-      const result = await onSendMessage(newMessage, file ? [file] : undefined)
-      if (result?.status !== 'error') {
-        setNewMessage('')
-        setFile(null)
+      setIsLoading(true)
+      try {
+        const result = await onSendMessage(newMessage, files.length > 0 ? files : undefined)
+        if (result?.status !== 'error') {
+          setNewMessage('')
+          setFiles([])
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ""
+          }
+        }
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -40,7 +63,13 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
   return (
     <form onSubmit={(e) => sendMessage(e)} className="sticky bottom-0 p-4 border-t bg-background">
       <div className="flex items-center space-x-2">
-        <Button type="button" variant="ghost" size="icon" onClick={triggerFileInput}>
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="icon" 
+          onClick={triggerFileInput}
+          disabled={isLoading}
+        >
           <Paperclip className="h-5 w-5" />
         </Button>
         <input
@@ -48,6 +77,8 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
+          multiple
+          disabled={isLoading}
         />
         <Input
           type="text"
@@ -61,19 +92,38 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
             }
           }}
           className="flex-grow"
+          disabled={isLoading}
         />
-        <EmojiPicker onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} />
-        <Button type="submit" size="icon">
-          <Send className="h-5 w-5" />
+        <EmojiPicker 
+          onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} 
+          disabled={isLoading}
+        />
+        <Button type="submit" size="icon" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Send className="h-5 w-5" />
+          )}
         </Button>
       </div>
-      {file && (
-        <div className="mt-2 flex items-center space-x-2">
-          <FileIcon className="h-4 w-4" />
-          <span className="text-sm">{file.name}</span>
-          <Button type="button" variant="ghost" size="sm" className="w-2"onClick={() => {setFile(null); fileInputRef.current && (fileInputRef.current.value = "")}}>
-            <X className="h-4 w-4" />
-          </Button>
+      {files.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center space-x-2 border rounded-md p-2">
+              <FileIcon className="h-4 w-4" />
+              <span className="text-sm">{file.name}</span>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                className="w-2"
+                onClick={() => removeFile(index)}
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
         </div>
       )}
     </form>

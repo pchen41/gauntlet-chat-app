@@ -81,6 +81,7 @@ channels:
 - type: text (values can bepublic, private or direct)
 - created_at: timestamp
 - created_by: uuid (user_id)
+- default: boolean (nullable)
 
 channel_members:
 - id: uuid
