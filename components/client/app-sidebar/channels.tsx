@@ -1,10 +1,10 @@
 'use client'
 
-import { Hash, LayoutGrid, LockIcon, MessageSquare, MessageSquarePlus, Plus, Search, Settings2 } from "lucide-react";
+import { Hash, LayoutGrid, LockIcon, MessageSquare, MessageSquarePlus, Plus, Search } from "lucide-react";
 import ChannelList from "./channel-list";
 import { useRouter } from 'next/navigation'
 import { User } from "@supabase/supabase-js";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Channel } from "@/types/types";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import Link from "next/link";

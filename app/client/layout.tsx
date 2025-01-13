@@ -38,7 +38,7 @@ export default async function ClientLayout({
   }
 
   // Get all members for direct message channels
-  // @ts-ignore
+  // @ts-expect-error
   const directChannels = channels?.filter(c => c.channels.type === 'direct').map(c => c.channels.id) || []
   const { data: channelMembers } = await supabase
     .from('channel_members')
@@ -56,7 +56,7 @@ export default async function ClientLayout({
     if (!acc[member.channel_id]) {
       acc[member.channel_id] = []
     }
-    // @ts-ignore
+    // @ts-expect-error
     acc[member.channel_id].push(member.profiles.name)
     return acc
   }, {} as Record<string, string[]>) || {}

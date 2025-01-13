@@ -4,7 +4,6 @@ import { Avatar } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn, getInitials, stringToColor } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { ChevronsUpDown, LogOut, UserIcon } from "lucide-react"
@@ -46,7 +45,7 @@ export default function Footer({user}: {user: User}) {
     getProfile()
   }, [user, getProfile])
 
-  var profileBlock = <>
+  let profileBlock = <>
     <div className="flex items-center space-x-4">
       <Skeleton className="h-8 w-8 rounded-full" />
       <div className="grid flex-1 space-y-2">

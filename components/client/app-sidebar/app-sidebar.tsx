@@ -3,8 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { User } from "@supabase/supabase-js"
@@ -53,13 +51,13 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
         if (!acc[member.channel_id]) {
           acc[member.channel_id] = []
         }
-        // @ts-ignore
+        // @ts-expect-error
         acc[member.channel_id].push((member.profiles as Profile).name)
         return acc
       }, {} as Record<string, string[]>) || {}
 
       const updatedChannels = channelMembers.map(member => {
-        // @ts-ignore
+        // @ts-expect-error
         const channel = member.channels as {id: string, name: string, type: string, created_at: string}
         let name = channel.name
 

@@ -6,7 +6,7 @@ import UserAvatar from "../user-avatar/user-avatar";
 import { format, formatDistanceToNow } from "date-fns";
 import { EmojiPicker } from "./emoji-picker";
 import { Button } from "@/components/ui/button";
-import { FileIcon, MessageCircle, MessageSquare } from "lucide-react";
+import { FileIcon, MessageCircle, MessageSquare, UserIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { User } from "@supabase/supabase-js";
 import { Separator } from "@/components/ui/separator";
@@ -38,8 +38,8 @@ export default function ChatMessage({
   onRemoveReaction: (id: string) => void
 }) {
   const profile = profiles.get(message.user_id)
-  const name = profile?.name || "Unknown User"
-  const email = profile?.email || "Unknown Email"
+  const name = profile?.name || ""
+  const email = profile?.email || ""
   const status = profile?.status || undefined
   const supabase = createClient()
   const { toast } = useToast()
@@ -123,7 +123,7 @@ export default function ChatMessage({
       { channelName && <span className="text-sm ml-4">{channelName}</span>}
       <div className={cn("flex items-start space-x-3 group p-4 pb-2 pt-0")}>
         <Avatar className="h-8 w-8 rounded-md flex-shrink-0 mt-1.5">
-          <UserAvatar name={name} email={email} />
+          {name && <UserAvatar name={name} email={email} /> }
         </Avatar>
 
         <div className="flex-grow">
