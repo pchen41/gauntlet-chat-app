@@ -124,7 +124,7 @@ export default function SearchResults({
         </p>
       </div>
       
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 p-2 overflow-y-auto">
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -144,7 +144,7 @@ export default function SearchResults({
         ) : (
           <div className="divide-y divide-border">
             {messages.map((message) => (
-              <div key={message.id} className="py-4 first:pt-0 last:pb-0">
+              <div key={message.id} className="py-2 first:pt-0 last:pb-0">
                 <ChatMessage
                   message={message}
                   user={user}

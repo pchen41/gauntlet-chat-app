@@ -20,7 +20,7 @@ import UserAvatar from "../user-avatar/user-avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Send, Loader2 } from "lucide-react"
-import { FormEvent, useState } from "react"
+import { FormEvent, useState, useRef, useEffect } from "react"
 import { sendMessage } from "./actions"
 
 interface Profile {
@@ -47,6 +47,33 @@ export function AvatarChat({ avatarProfile, isOpen, onOpenChange }: AvatarChatPr
     role: 'assistant',
     content: "Send me a message to get started!"
   }])
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const isAtBottomRef = useRef(true)
+
+  // Add scroll listener to track if user is at bottom
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    if (!scrollArea) return
+
+    const handleScroll = () => {
+      const { scrollHeight, scrollTop, clientHeight } = scrollArea
+      isAtBottomRef.current = scrollHeight - (scrollTop + clientHeight) < 10
+    }
+
+    scrollArea.addEventListener('scroll', handleScroll)
+    return () => scrollArea.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Scroll to bottom when messages change if user was at bottom
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    if (!scrollArea || !isAtBottomRef.current) return
+
+    scrollArea.scrollTo({
+      top: scrollArea.scrollHeight,
+      behavior: 'smooth'
+    })
+  }, [messages])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -98,7 +125,7 @@ export function AvatarChat({ avatarProfile, isOpen, onOpenChange }: AvatarChatPr
             </div>
           </CardHeader>
           <CardContent className="flex-grow overflow-hidden p-6 pt-0">
-            <ScrollArea className="h-full pr-4">
+            <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
               <div className="flex flex-col gap-4">
                 {messages.map((message, index) => (
                   <div

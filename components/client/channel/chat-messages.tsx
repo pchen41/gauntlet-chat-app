@@ -21,7 +21,8 @@ export default function ChatMessages({
   onOpenThread,
   addReaction,
   removeReaction,
-  handleUserClick
+  handleUserClick,
+  disabled
 }: {
   user: User,
   channelId: string,
@@ -32,7 +33,8 @@ export default function ChatMessages({
   onOpenThread: (messageId: string) => void,
   addReaction: (id: string, messageId: string, userId: string, reaction: string, createdAt: string) => void,
   removeReaction: (id: string) => void,
-  handleUserClick: (userId: string) => void
+  handleUserClick: (userId: string) => void,
+  disabled: boolean
 }) {
   const { toast }= useToast()
   const [messageIds, setMessageIds] = useState<string[]>([]);
@@ -269,6 +271,7 @@ export default function ChatMessages({
             onOpenThread={onOpenThread} 
             onAddReaction={addReaction} 
             onRemoveReaction={removeReaction} 
+            disabled={disabled}
           />
         );
       })}

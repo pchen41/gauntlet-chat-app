@@ -2,7 +2,7 @@
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Channel } from "@/types/types";
-import { ArrowLeftFromLine, Hash, LockIcon, MessageSquare, MoreHorizontal, MoreVertical, Users } from "lucide-react";
+import { ArrowLeftFromLine, Hash, LockIcon, MessageSquare, MoreHorizontal, MoreVertical, Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
@@ -12,10 +12,10 @@ import { useRouter } from "next/navigation";
 import ChannelMembersDialog from "./channel-members-dialog";
 import { Separator } from "@/components/ui/separator";
 
-export default function ChannelHeader({user, channel}: {user: User, channel: Channel}) {
+export default function ChannelHeader({user, channel, isMember}: {user: User, channel: Channel, isMember: boolean}) {
   const router = useRouter()
   const { toast } = useToast()
-  const [isLeaving, setIsLeaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false)
   const supabase = createClient()
   
@@ -26,10 +26,29 @@ export default function ChannelHeader({user, channel}: {user: User, channel: Cha
     icon = <MessageSquare className="h-4 w-4" />
   }
 
+  async function joinChannel() {
+    if (!user) return;
+    setIsLoading(true)
+
+    const { error } = await supabase
+      .from('channel_members')
+      .insert({ channel_id: channel.id, user_id: user.id })
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to join channel",
+        variant: "destructive",
+      })
+    } else {
+      router.refresh()
+    }
+    setIsLoading(false)
+  }
 
   async function leaveChannel() {
     if (!user) return;
-    setIsLeaving(true)
+    setIsLoading(true)
 
     const { error } = await supabase
       .from('channel_members')
@@ -43,7 +62,6 @@ export default function ChannelHeader({user, channel}: {user: User, channel: Cha
         description: "Failed to leave channel",
         variant: "destructive",
       })
-      setIsLeaving(false)
     } else {
       router.push('/client')
       toast({
@@ -51,19 +69,18 @@ export default function ChannelHeader({user, channel}: {user: User, channel: Cha
         description: "Left channel successfully",
       })
     }
+    setIsLoading(false)
   }
 
   async function hideChannel() {
     if (!user) return;
-    setIsLeaving(true);
+    setIsLoading(true);
 
     const { error } = await supabase
       .from('channel_members')
       .update({ hidden_from_channel_list: true })
       .eq('channel_id', channel.id)
       .eq('user_id', user.id);
-
-    setIsLeaving(false);
 
     if (error) {
       toast({
@@ -78,6 +95,7 @@ export default function ChannelHeader({user, channel}: {user: User, channel: Cha
         description: "Channel hidden successfully",
       });
     }
+    setIsLoading(false);
   }
 
   return (
@@ -99,18 +117,27 @@ export default function ChannelHeader({user, channel}: {user: User, channel: Cha
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsMembersDialogOpen(true)}>
-            <Users className="h-4 w-4" />
-            {channel.type === 'direct' ? 'View Members' : 'Manage Members'}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={channel.type === 'direct' ? hideChannel : leaveChannel}
-            disabled={isLeaving}
-            className="text-red-600 focus:text-red-600 focus:bg-red-100"
-          >
-            <ArrowLeftFromLine className="h-4 w-4" />
-            {channel.type === 'direct' ? 'Hide Channel' : 'Leave Channel'}
-          </DropdownMenuItem>
+          {isMember ? (
+            <>
+              <DropdownMenuItem onClick={() => setIsMembersDialogOpen(true)}>
+                <Users className="h-4 w-4" />
+                {channel.type === 'direct' ? 'View Members' : 'Manage Members'}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={channel.type === 'direct' ? hideChannel : leaveChannel}
+                disabled={isLoading}
+                className="text-red-600 focus:text-red-600 focus:bg-red-100"
+              >
+                <ArrowLeftFromLine className="h-4 w-4" />
+                {channel.type === 'direct' ? 'Hide Channel' : 'Leave Channel'}
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <DropdownMenuItem onClick={joinChannel} disabled={isLoading}>
+              <UserPlus className="h-4 w-4" />
+              Join Channel
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <ChannelMembersDialog

@@ -21,6 +21,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { AvatarChat } from "@/components/client/avatar-chat/avatar-chat"
+import Link from "next/link"
+import { X } from "lucide-react"
 
 interface Profile {
   id: string
@@ -109,11 +111,14 @@ export function CreateAvatarChatModal({ isOpen, onClose, currentUser }: CreateAv
                   <TooltipProvider>
                     <Tooltip delayDuration={500}>
                       <TooltipTrigger asChild>
-                        <div className="flex items-center gap-2 bg-secondary rounded-full px-3 py-1">
-                          <Avatar className="h-6 w-6">
-                            <UserAvatar name={selectedUser.name} email={selectedUser.email}/>
-                          </Avatar>
+                        <div className="flex items-center gap-1 bg-secondary px-3 py-1 rounded-full">
                           <span className="text-sm">{selectedUser.name}</span>
+                          <button
+                            onClick={() => setSelectedUser(null)}
+                            className="p-0.5 hover:bg-muted rounded-full"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>

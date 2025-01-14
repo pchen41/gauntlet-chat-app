@@ -12,10 +12,10 @@ import { Channel, Message, Profile } from "@/types/types";
 import { ChatThread } from "./chat-thread";
 import { UserProfile } from "./user-profile";
 
-export default function ChatContainer({user, channel} : {user: User, channel: Channel}) {
+export default function ChatContainer({user, channel, isMember} : {user: User, channel: Channel, isMember: boolean}) {
   const { toast } = useToast()
   const supabase = createClient()
-  const [mainChatEnabled, setMainChatEnabled] = useState(true)
+  const [mainChatEnabled, setMainChatEnabled] = useState(isMember ?? false)
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [messagesMap, setMessagesMap] = useState<Map<string, Message>>(new Map());
   const [threadMessageId, setThreadMessageId] = useState<string | null>(null);
@@ -158,7 +158,7 @@ export default function ChatContainer({user, channel} : {user: User, channel: Ch
     });
   }
 
-  async function onOpenThread(messageId: string) {
+  function onOpenThread(messageId: string) {
     setThreadMessageId(messageId)
   }
 
@@ -175,7 +175,7 @@ export default function ChatContainer({user, channel} : {user: User, channel: Ch
   }
 
   return <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background">
-    <ChannelHeader user={user} channel={channel}/>
+    <ChannelHeader user={user} channel={channel} isMember={isMember}/>
     <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-col flex-1">
         <ChatMessages 
@@ -189,8 +189,20 @@ export default function ChatContainer({user, channel} : {user: User, channel: Ch
           removeReaction={removeReaction} 
           addReaction={addReaction}
           handleUserClick={handleUserClick}
+          disabled={!isMember}
         />
-        <ChatInput onSendMessage={(message: string, files?: File[], parentId?: string) => onSendMessage(message, setMainChatEnabled, files, parentId)} active={mainChatEnabled} />
+        {isMember ? (
+          <ChatInput 
+            onSendMessage={(message: string, files?: File[], parentId?: string) => 
+              onSendMessage(message, setMainChatEnabled, files, parentId)
+            } 
+            active={mainChatEnabled} 
+          />
+        ) : (
+          <div className="p-4 text-center border-t bg-muted/20">
+            <span className="text-muted-foreground">Join this channel to participate in the conversation</span>
+          </div>
+        )}
       </div>
       {threadMessageId && (
         <div className="w-[400px] border-l flex flex-col">

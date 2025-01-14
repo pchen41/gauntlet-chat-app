@@ -22,7 +22,10 @@ export default async function Channel({params}: {params: {channelId: string}}) {
     .eq('user_id', data.user.id)
     .single()
 
-  if (memberError || !memberData) {
+  const isMember = !!memberData
+
+  // Only redirect if it's not a public channel and user is not a member
+  if ((memberError || !memberData) && channelData.type !== 'public') {
     redirect('/client/channels')
   }
 
@@ -32,11 +35,11 @@ export default async function Channel({params}: {params: {channelId: string}}) {
     type: channelData.type,
     description: channelData.description,
     createdBy: channelData.created_by,
-    joinedAt: memberData.created_at,
-    updatedAt: memberData.updated_at
+    joinedAt: memberData?.created_at,
+    updatedAt: memberData?.updated_at
   }
 
   return (
-    <ChatContainer user={data.user} channel={channel}/>
+    <ChatContainer user={data.user} channel={channel} isMember={isMember} />
   )
 }

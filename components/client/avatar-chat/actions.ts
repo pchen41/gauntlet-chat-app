@@ -8,8 +8,6 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents"
 
 export async function sendMessage(avatarUserId: string, message: string) {
-  console.log("received user id", avatarUserId)
-  console.log("received message", message)
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const vectorStore = new SupabaseVectorStore(
     new OpenAIEmbeddings({ apiKey: process.env.OPENAI_API_KEY }), 

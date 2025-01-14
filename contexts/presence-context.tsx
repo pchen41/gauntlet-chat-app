@@ -35,7 +35,6 @@ export function PresenceProvider({ children, user }: { children: React.ReactNode
       })
     
     return () => {
-      console.log('unsubscribing from online-users channel')
       channel.unsubscribe()
     }
   }, [])
