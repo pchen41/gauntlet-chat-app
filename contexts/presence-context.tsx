@@ -29,8 +29,6 @@ export function PresenceProvider({ children, user }: { children: React.ReactNode
         setOnlineUsers(online)
       })
       .subscribe(async (status) => {
-        console.log('subscribed')
-        console.log(status)
         if (status === 'SUBSCRIBED') {
           await channel.track({ user_id: user.id })
         }

@@ -13,7 +13,7 @@ export default async function Channels() {
   return (
     <div className="pl-8 pr-8 pt-6 flex w-[calc(100vw-16rem)] justify-center">
       <div className="w-full">
-        <div className="text-2xl font-semibold leading-none tracking-tight mb-1.5">Browse Channels</div>
+        <div className="text-2xl font-semibold leading-none tracking-tight mb-1.5">Manage Channels</div>
         <div className="text-sm text-muted-foreground">View, join and create channels</div>
         <div className="mt-6">
           <ChannelBrowser user={data.user} />

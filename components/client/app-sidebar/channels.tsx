@@ -32,7 +32,7 @@ export default function Channels({user, channels, selectedChannelId}: {user: Use
       <SidebarMenuButton asChild>
         <Link href="/client/channels" className="text-primary/50 hover:text-primary/50 active:text-primary/50">
           <LayoutGrid/>
-          <span>Browse channels</span>
+          <span>Manage channels</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>

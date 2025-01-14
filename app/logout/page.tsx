@@ -7,7 +7,8 @@ export default async function Logout() {
 
   if (error) {
     alert(error.message)
+    console.error(error)
+  } else {
+    return redirect('/')
   }
-
-  return redirect('/')
 }

@@ -11,7 +11,9 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
   const [newMessage, setNewMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -36,6 +38,33 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
     setFiles(prev => prev.filter((_, i) => i !== index))
     if (files.length === 1 && fileInputRef.current) {
       fileInputRef.current.value = ""
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value)
+    setCursorPosition(e.target.selectionStart || 0)
+  }
+
+  const insertEmoji = (emoji: string) => {
+    const start = cursorPosition
+    const end = cursorPosition
+    const newValue = newMessage.substring(0, start) + emoji + newMessage.substring(end)
+    setNewMessage(newValue)
+    
+    // Set cursor position after emoji
+    const newPosition = start + emoji.length
+    setCursorPosition(newPosition)
+    
+    // Focus input and set cursor position
+    if (inputRef.current) {
+      inputRef.current.focus()
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.selectionStart = newPosition
+          inputRef.current.selectionEnd = newPosition
+        }
+      }, 0)
     }
   }
 
@@ -81,10 +110,12 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
           disabled={isLoading}
         />
         <Input
+          ref={inputRef}
           type="text"
           placeholder="Type a message..."
           value={newMessage}
-          onChange={(e: any) => setNewMessage(e.target.value)}
+          onChange={handleInputChange}
+          onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
           onKeyUp={(e: any) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -95,7 +126,7 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
           disabled={isLoading}
         />
         <EmojiPicker 
-          onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} 
+          onEmojiSelect={insertEmoji}
           disabled={isLoading}
         />
         <Button type="submit" size="icon" disabled={isLoading}>

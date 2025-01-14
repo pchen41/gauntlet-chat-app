@@ -12,6 +12,7 @@ import { Channel, Profile } from "@/types/types"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { usePathname } from 'next/navigation'
+import Link from "next/link"
 
 export function AppSidebar({user, initialChannels}: {user: User, initialChannels: Channel[]}) {
   const [channels, setChannels] = useState<Channel[]>(initialChannels)
@@ -104,7 +105,7 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
   return (
     <Sidebar collapsible="none" className="h-screen" variant="inset">
       <SidebarHeader className="p-4">
-        <h1 className="text-xl font-bold">pChat</h1>
+        <Link href="/client" className="text-xl font-bold">pChat</Link>
       </SidebarHeader>
       <SidebarContent>
         <Channels user={user} channels={channels} selectedChannelId={channelId}/>

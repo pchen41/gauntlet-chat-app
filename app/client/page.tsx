@@ -19,7 +19,7 @@ export default async function Client() {
     .single()
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center space-y-8 p-4">
+    <div className="h-screen flex flex-col items-center justify-center space-y-8 p-4 pt-0 pb-16">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight">
           Welcome to pChat{profile?.name ? `, ${profile.name}` : ''}
