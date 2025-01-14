@@ -13,14 +13,18 @@ export default function ChannelList({label, items, footerItem}: {label: string, 
     <Collapsible defaultOpen className="group/collapsible">
       <SidebarGroup>
         <SidebarGroupLabel asChild className="group/label">
-          <CollapsibleTrigger>            
-            {label}
-            <ChevronDown className={cn(
-              "ml-auto transition-transform transition-opacity duration-200",
-              "opacity-0 group-hover/label:opacity-100 group-data-[state=closed]/collapsible:opacity-100",
-              "group-data-[state=open]/collapsible:rotate-180"
-            )} />
-          </CollapsibleTrigger>
+          {items.length > 0 ? (
+            <CollapsibleTrigger>            
+              {label}
+              <ChevronDown className={cn(
+                "ml-auto transition-transform transition-opacity duration-200",
+                "opacity-0 group-hover/label:opacity-100 group-data-[state=closed]/collapsible:opacity-100",
+                "group-data-[state=open]/collapsible:rotate-180"
+              )} />
+            </CollapsibleTrigger>
+          ) : (
+            <div>{label}</div>
+          )}
         </SidebarGroupLabel>
         <CollapsibleContent>
           <SidebarGroupContent>

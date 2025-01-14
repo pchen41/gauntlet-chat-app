@@ -1,5 +1,6 @@
 import ChatContainer from "@/components/client/channel/chat-container";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function Channel({params}: {params: {channelId: string}}) {
   const supabase = await createClient()
@@ -10,7 +11,19 @@ export default async function Channel({params}: {params: {channelId: string}}) {
 
   const { data: channelData, error: channelError } = await supabase.from('channels').select('*').eq('id', (await params).channelId).single()
   if (channelError) {
-    return null
+    redirect('/client/channels')
+  }
+
+  // Check if user is a member of the channel
+  const { data: memberData, error: memberError } = await supabase
+    .from('channel_members')
+    .select('*')
+    .eq('channel_id', channelData.id)
+    .eq('user_id', data.user.id)
+    .single()
+
+  if (memberError || !memberData) {
+    redirect('/client/channels')
   }
 
   const channel = {
@@ -19,8 +32,8 @@ export default async function Channel({params}: {params: {channelId: string}}) {
     type: channelData.type,
     description: channelData.description,
     createdBy: channelData.created_by,
-    joinedAt: '',
-    updatedAt: ''
+    joinedAt: memberData.created_at,
+    updatedAt: memberData.updated_at
   }
 
   return (

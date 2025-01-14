@@ -25,10 +25,9 @@ export default function SearchResults({
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
+  const [lastCreatedAt, setLastCreatedAt] = useState<string | null>(null)
   const { ref, inView } = useInView()
   const supabase = createClient()
-  const router = useRouter()
   const { toast } = useToast()
 
   const parseQuery = (query: string) => {
@@ -46,7 +45,6 @@ export default function SearchResults({
     try {
       const { searchText, email } = parseQuery(initialQuery)
       
-      // Format search text by removing duplicate spaces and replacing remaining spaces with +
       const formattedSearchText = searchText.replace(/\s+/g, ' ').trim().replace(/\s/g, '+')
       let query = supabase
         .from('messages')
@@ -57,31 +55,23 @@ export default function SearchResults({
           channels!inner(id, type, name)
         `)
         .textSearch('message', formattedSearchText)
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
         .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE)
 
-      /*
-      // Filter for accessible channels
-      query = query.or(`channels.type.eq.public,channels.id.in.${
-        supabase.from('channel_members')
-          .select('channel_id')
-          .eq('user_id', user.id)
-      }`)
-
-      if (email) {
-        query = query.or(`user_id.in.${
-          supabase.from('profiles')
-            .select('id')
-            .eq('email', email)
-        }`)
-      }*/
+      if (!isInitial && lastCreatedAt) {
+        query = query.lt('created_at', lastCreatedAt)
+      }
 
       const { data, error } = await query
 
       if (error) throw error
 
       if (data) {
-        // Fetch profiles for messages
+        const lastMessage = data[data.length - 1]
+        if (lastMessage) {
+          setLastCreatedAt(lastMessage.created_at)
+        }
+
         const userIds = [...new Set(data.map(m => m.user_id))]
         const { data: profilesData } = await supabase
           .from('profiles')
@@ -89,10 +79,15 @@ export default function SearchResults({
           .in('id', userIds)
 
         if (profilesData) {
-          setProfiles(new Map(profilesData.map(p => [p.id, p])))
+          setProfiles(prev => new Map([...Array.from(prev.entries()), ...profilesData.map(p => [p.id, p] as [string, Profile])]))
         }
 
-        setMessages(prev => isInitial ? data : [...prev, ...data])
+        setMessages(prev => {
+          const newMessages = isInitial ? data : [...prev, ...data]
+          return newMessages.filter((message, index, self) => 
+            index === self.findIndex(m => m.id === message.id)
+          )
+        })
         setHasMore(data.length === PAGE_SIZE)
       }
     } catch (error: any) {
@@ -108,7 +103,7 @@ export default function SearchResults({
 
   useEffect(() => {
     setMessages([])
-    setPage(0)
+    setLastCreatedAt(null)
     setHasMore(true)
     setIsLoading(true)
     fetchResults(true)
@@ -116,7 +111,6 @@ export default function SearchResults({
 
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
-      setPage(p => p + 1)
       fetchResults()
     }
   }, [inView])

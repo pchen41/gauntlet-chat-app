@@ -90,3 +90,9 @@ channel_members:
 - created_at: timestamp
 - updated_at: timestamp
 - hidden_from_channel_list: boolean (nullable, default false)
+
+documents:
+- id: uuid
+- content: text
+- embedding: vector
+- metadata: jsonb
