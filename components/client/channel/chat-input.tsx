@@ -123,7 +123,6 @@ export default function ChatInput({active, onSendMessage} : {active: boolean, on
             }
           }}
           className="flex-grow"
-          disabled={isLoading}
         />
         <EmojiPicker 
           onEmojiSelect={insertEmoji}

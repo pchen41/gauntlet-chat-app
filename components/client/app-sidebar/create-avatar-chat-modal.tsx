@@ -53,7 +53,6 @@ export function CreateAvatarChatModal({ isOpen, onClose, currentUser }: CreateAv
     const { data } = await supabase
       .from('profiles')
       .select('id, name, email')
-      .neq('id', currentUser.id)
       .or(`name.ilike.%${search}%,email.ilike.%${search}%`)
       .limit(10)
     
@@ -101,7 +100,7 @@ export function CreateAvatarChatModal({ isOpen, onClose, currentUser }: CreateAv
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Chat with an avatar</DialogTitle>
-            <DialogDescription>Avatars are AI bots that simulate other users</DialogDescription>
+            <DialogDescription>Avatars are AI bots that simulate other users (or yourself!)</DialogDescription>
           </DialogHeader>
           
           <div className="flex flex-col gap-4">
