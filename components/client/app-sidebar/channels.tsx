@@ -72,7 +72,7 @@ export default function Channels({user, channels, selectedChannelId}: {user: Use
       />
       <ChannelList label="Channels" items={channelsList} footerItem={channelsFooter}/>
       <ChannelList label="Direct Messages" items={dmsList} footerItem={dmsFooter} />
-      <ChannelList label="AI Avatars" items={[]} footerItem={avatarsFooter} />
+      <ChannelList label="User Avatars" items={[]} footerItem={avatarsFooter} />
     </>
   )
 }
