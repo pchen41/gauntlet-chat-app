@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils"
 import { ChevronDown, EyeClosed, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { JSX } from "react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-export default function ChannelList({label, items, footerItem}: {label: string, items: {name: string, url: string, icon: React.ReactNode, selected?: boolean}[], footerItem?: JSX.Element}) {
+export default function ChannelList({label, items, footerItem}: {label: string, items: {name: React.ReactNode, url: string, icon: React.ReactNode, selected?: boolean, tooltip?:React.ReactNode}[], footerItem?: JSX.Element}) {
   return (
     <Collapsible defaultOpen className="group/collapsible">
       <SidebarGroup>
@@ -31,12 +32,30 @@ export default function ChannelList({label, items, footerItem}: {label: string, 
             <SidebarMenu>
               {items.map((item, index) => (
                 <SidebarMenuItem key={index}>
-                  <SidebarMenuButton asChild className={cn('rounded-md', item.selected ? 'bg-gray-200 hover:bg-gray-200' : '')}>
-                    <Link href={item.url}>
-                      {item.icon}
-                      <span>{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                  {item.tooltip ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton asChild className={cn('rounded-md', item.selected ? 'bg-gray-200 hover:bg-gray-200' : '')}>
+                            <Link href={item.url}>
+                              {item.icon}
+                              <span>{item.name}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {item.tooltip}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <SidebarMenuButton asChild className={cn('rounded-md', item.selected ? 'bg-gray-200 hover:bg-gray-200' : '')}>
+                      <Link href={item.url}>
+                        {item.icon}
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

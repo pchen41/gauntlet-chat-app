@@ -9,13 +9,14 @@ import { User } from "@supabase/supabase-js"
 import Footer from "./footer"
 import Channels from "./channels"
 import { Channel, Profile } from "@/types/types"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { usePathname } from 'next/navigation'
 import Link from "next/link"
 
+type SidebarChannel = Channel & {profiles?: {id: string, status: string, name: string}[]}
 export function AppSidebar({user, initialChannels}: {user: User, initialChannels: Channel[]}) {
-  const [channels, setChannels] = useState<Channel[]>(initialChannels)
+  const [channels, setChannels] = useState<SidebarChannel[]>(initialChannels)
   const supabase = createClient()
   const pathname = usePathname()
 
@@ -42,7 +43,9 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
         .select(`
           channel_id,
           profiles:user_id (
-            name
+            id,
+            name,
+            status
           )
         `)
         .in('channel_id', channelMembers.map(m => m.channel_id))
@@ -53,7 +56,7 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
           acc[member.channel_id] = []
         }
         // @ts-expect-error
-        acc[member.channel_id].push((member.profiles as Profile).name)
+        acc[member.channel_id].push((member.profiles as Profile))
         return acc
       }, {} as Record<string, string[]>) || {}
 
@@ -61,9 +64,13 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
         // @ts-expect-error
         const channel = member.channels as {id: string, name: string, type: string, created_at: string}
         let name = channel.name
+        let profiles = undefined
 
         if (channel.type === 'direct' && membersByChannel[channel.id]) {
-          name = membersByChannel[channel.id].join(', ')
+          // @ts-expect-error
+          name = membersByChannel[channel.id].map(m => m.name).join(', ')
+          // @ts-expect-error
+          profiles = membersByChannel[channel.id].map(m => ({id: m.id, status: m.status, name: m.name}))
         }
 
         return {
@@ -71,7 +78,8 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
           name,
           type: channel.type,
           joinedAt: member.created_at,
-          updatedAt: member.updated_at
+          updatedAt: member.updated_at,
+          profiles
         }
       })
 
@@ -80,6 +88,7 @@ export function AppSidebar({user, initialChannels}: {user: User, initialChannels
   }
 
   useEffect(() => {
+    fetchChannels()
     const channel = supabase
       .channel('channel-changes-'+user.id)
       .on('postgres_changes', {

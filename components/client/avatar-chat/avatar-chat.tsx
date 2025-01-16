@@ -89,7 +89,7 @@ export function AvatarChat({ avatarProfile, isOpen, onOpenChange }: AvatarChatPr
     setIsLoading(true)
 
     try {
-      const result = await sendMessage(avatarProfile.id, userMessage.content)
+      const result = await sendMessage(avatarProfile.id, userMessage.content, messages.slice(-10))
       // Add assistant response
       const assistantMessage: Message = {
         role: 'assistant',
