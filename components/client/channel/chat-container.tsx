@@ -225,6 +225,7 @@ export default function ChatContainer({user, channel, isMember} : {user: User, c
             userId={selectedUserId}
             profiles={Object.fromEntries(profiles)}
             handleCloseProfile={handleCloseProfile}
+            currentUser={user}
           />
         </div>
       )}

@@ -34,7 +34,7 @@ export async function sendMessage(avatarUserId: string, message: string, prevMes
 
   const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", avatarUserId).single()
   const context = documents.map((doc) => doc.pageContent).join("\n");
-  const ragMessage = `Use the following pieces of context as well as the previous messages to answer the question at the end. Pretend you are a person named ${profile.name} who has written the context and use their tone and style in your response. Use three sentences maximum and keep the answer concise.
+  const ragMessage = `Use the following pieces of context as well as the previous messages to answer the question at the end. Pretend you are a person named ${profile.name} who has written the context and use their tone and style in your response. Use three sentences maximum and keep the answer concise. Information from previous messages should take precedence over the context.
   
   ${context}
 
